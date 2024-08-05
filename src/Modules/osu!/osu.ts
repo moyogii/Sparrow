@@ -191,7 +191,10 @@ export class osuAPI {
         tokenResponse.data.refresh_token,
       );
 
-      res.redirect(`https://sparrowbot.com/success.html`);
+      // Redirect the player to a success page.
+      if (Config.osuSuccessRedirectPage) {
+        res.redirect(Config.osuSuccessRedirectPage);
+      }
       return;
     }
 
@@ -207,7 +210,11 @@ export class osuAPI {
       tokenResponse.data.access_token,
       tokenResponse.data.refresh_token,
     );
-    res.redirect(`https://sparrowbot.com/success.html`);
+
+    // Redirect the player to a success page.
+    if (Config.osuSuccessRedirectPage) {
+      res.redirect(Config.osuSuccessRedirectPage);
+    }
   }
 
   public async connectOsuAccount(

@@ -21,8 +21,6 @@ import { InteractionCommand } from '../../../Classes/core/discord/helpers';
 import {
   ApplicationCommandType,
   ChatInputCommandInteraction,
-  GuildMember,
-  User,
 } from 'discord.js';
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 
@@ -61,7 +59,7 @@ const command: InteractionCommand = {
       Bot.catchError(error);
     }
   },
-  hasPermission: function (interaction: ChatInputCommandInteraction) {
+  hasPermission: function () {
     return true;
   },
 };

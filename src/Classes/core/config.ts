@@ -73,6 +73,8 @@ class BotConfig {
   public musicNodePass = process.env.MUSIC_NODE_PASS;
 
   public sentryDSN = process.env.SENTRY_DSN;
+
+  public osuSuccessRedirectPage = process.env.OSU_SUCCESS_REDIRECT_PAGE;
 }
 
 export const Config = new BotConfig();
