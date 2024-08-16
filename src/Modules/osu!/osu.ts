@@ -29,21 +29,21 @@ import {
 } from './helpers';
 import { Interactions } from '../../Classes/core/interactions';
 import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Colors,
   CommandInteraction,
   DMChannel,
   EmbedAuthorData,
-  GuildEmoji,
   EmbedBuilder,
+  GuildEmoji,
+  InteractionResponse,
+  MessageActionRowComponentBuilder,
   NewsChannel,
+  resolveColor,
   TextChannel,
   User,
-  ButtonStyle,
-  resolveColor,
-  Colors,
-  ActionRowBuilder,
-  MessageActionRowComponentBuilder,
-  ButtonBuilder,
-  InteractionResponse,
 } from 'discord.js';
 import { diff, modbits, parser, ppv2, std_diff, std_ppv2 } from 'ojsama';
 import { Config } from '../../Classes/core/config';
@@ -203,7 +203,7 @@ export class osuAPI {
     player.token = tokenResponse.data.access_token;
     player.refresh_token = tokenResponse.data.refresh_token;
 
-    playerDatabase.save(player);
+    await playerDatabase.save(player);
     this.updateOsuPlayer(
       playerID,
       discord_id,
@@ -223,7 +223,6 @@ export class osuAPI {
     const member: User | undefined = interaction.user
       ? interaction.user
       : (interaction.member?.user as User);
-    if (!(member instanceof User)) return;
 
     const user: User | undefined = Bot.app.users.cache.get(member.id);
     if (!user) return;
@@ -264,7 +263,6 @@ export class osuAPI {
     const member: User | undefined = interaction.user
       ? interaction.user
       : (interaction.member?.user as User);
-    if (!(member instanceof User)) return;
 
     const user: User | undefined = Bot.app.users.cache.get(member.id);
     if (!user) return;
@@ -309,7 +307,6 @@ export class osuAPI {
     const member: User | undefined = interaction.user
       ? interaction.user
       : (interaction.member?.user as User);
-    if (!(member instanceof User)) return;
 
     const currentPlayer: osuPlayer | undefined = this.findOsuPlayer(member.id);
     if (!currentPlayer)
@@ -346,7 +343,6 @@ export class osuAPI {
     const recentPlayEmbed: EmbedBuilder | undefined = await this.buildPlayEmbed(
       recentResponse.data[0],
       profileResponse.data,
-      interaction.guild.id,
     );
     if (!recentPlayEmbed) return;
 
@@ -828,7 +824,7 @@ export class osuAPI {
     }
 
     trackedList.push(trackPlayer.toLowerCase());
-    BotUtil.config.setValue(
+    await BotUtil.config.setValue(
       'osu.trackedplayers',
       trackedList,
       interaction.guild.id,
@@ -873,7 +869,7 @@ export class osuAPI {
 
       if (player.toLowerCase() === untrackPlayer.toLowerCase()) {
         currentTrackedList.splice(index, 1);
-        BotUtil.config.setValue(
+        await BotUtil.config.setValue(
           'osu.trackedplayers',
           currentTrackedList,
           interaction.guild.id,
@@ -989,12 +985,11 @@ export class osuAPI {
           const playEmbed: EmbedBuilder | undefined = await this.buildPlayEmbed(
             currentPlay,
             profileResponse.data,
-            guild_id,
             pbScore,
           );
           if (!playEmbed) return;
 
-          foundChannel.send({ embeds: [playEmbed] });
+          await foundChannel.send({ embeds: [playEmbed] });
         }
       }
 
@@ -1058,11 +1053,11 @@ export class osuAPI {
       'Content-Type': 'application/json',
     };
 
-    const apiResponse = await axios
+    return await axios
       .get(`${url}`, {
         headers: configRequest,
       })
-      .catch(function (error) {
+      .catch(function(error) {
         if (!error.isAxiosError) return;
         if (error.response && error.response.status == 401) return;
 
@@ -1073,8 +1068,6 @@ export class osuAPI {
 
         return;
       });
-
-    return apiResponse;
   }
 
   private getFlagEmoji(flag: string) {
@@ -1135,7 +1128,6 @@ export class osuAPI {
   private async buildPlayEmbed(
     play: osuScore,
     profile: osuUser,
-    guild_id: string,
     position?: number,
   ) {
     if (!play || !profile) return;
